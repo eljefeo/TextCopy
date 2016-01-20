@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="js/res/bootstrap-3.3.6/css/bootstrap.min.css">
+  <script src="js/res/jquery-2.2.0.min.js"></script>
+   <script src="js/res/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+  <script src="js/popup.js"></script>
+  <style type="text/css">
+body {
+  min-width: 500px; /* your desired width */
+  max-width: 100%;
+  position: relative;
+  vertical-align:middle;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+  <h1><span id="spanOther">Text Copy is:</span>
+  <span id="spanStatus" class="label label-default"></span></h1>
+
+  <div>
+    <button id="switchEnable" type="button" class="btn btn-default">
+    
+    <span id="spanEnabled">Turn Text Copy </span>
+    <span id="spanButtonChange">Off</span>
+
+  </button>
+    <div id="status">
+      <p>
+You can use text copy by performing Ctrl+click
+ <br>This will select all text in whatever tag/element you clicked.
+ <br><br>
+ *** NOTE: Once you turn on Text Copy<br>
+ Ctrl+click will not follow all hyperlinks.
+ <br> Instead, it will try to highlight the text in said link.
+</p>
+    </div>
+
+
+</body>
+</html>
