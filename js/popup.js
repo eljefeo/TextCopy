@@ -3,16 +3,8 @@ $(function() {
         greeting: "getEnabled"
     }, function(response) {
         var enabled = response.result;
-        if (enabled) {
-            document.getElementById("spanButtonChange").innerHTML = "Off";
-            document.getElementById("spanStatus").className = "label label-success";
-            document.getElementById("spanStatus").innerHTML = "On";
-        } else {
-            document.getElementById("spanButtonChange").innerHTML = "On";
-            document.getElementById("spanStatus").className = "label label-warning";
-            document.getElementById("spanStatus").innerHTML = "Off";
-
-        }
+        updateFront(enabled);
+        
     });
 
     $('#switchEnable').on('click', function(e) {
@@ -20,16 +12,13 @@ $(function() {
             greeting: "changeEnabled"
         }, function(response) {
             var enabled = response.result;
-            if (enabled) {
-                document.getElementById("spanButtonChange").innerHTML = "Off";
-                document.getElementById("spanStatus").className = "label label-success";
-                document.getElementById("spanStatus").innerHTML = "On";
-
-            } else {
-                document.getElementById("spanButtonChange").innerHTML = "On";
-                document.getElementById("spanStatus").className = "label label-warning";
-                document.getElementById("spanStatus").innerHTML = "Off";
-            }
+        updateFront(enabled);
         });
     });
 });
+
+function updateFront(enabled) {
+    document.getElementById("spanButtonChange").innerHTML = enabled ? "Off" : "On";
+    document.getElementById("spanStatus").className = enabled ? "label label-success" : "label label-warning";
+    document.getElementById("spanStatus").innerHTML = enabled ? "On" : "Off";
+}

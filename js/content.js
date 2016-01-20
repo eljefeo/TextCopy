@@ -4,25 +4,26 @@ var enabled = false,
     mouseX = 0,
     mouseY = 0;
 
+function getEnabled() {
+    chrome.runtime.sendMessage({
+        greeting: "getEnabled"
+    }, function(response) {
+        enabled = response.result;
+    });
+}
+
 window.addEventListener("keydown", function(event) {
     keys[event.keyCode] = true;
     if (keys[16] && keys[17]) {
 
-        chrome.runtime.sendMessage({
-            greeting: "getEnabled"
-        }, function(response) {
-            enabled = response.result;
-        });
+        getEnabled();
+
         if (enabled) {
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         }
     } else if (keys[18] && keys[17]) {
 
-        chrome.runtime.sendMessage({
-            greeting: "getEnabled"
-        }, function(response) {
-            enabled = response.result;
-        });
+        getEnabled();
         if (enabled) {
             if (elements.length == 2) {
                 elements = [];
@@ -56,27 +57,25 @@ function selectTextTwoElements(startElement, endElement) {
     if (doc.body.createTextRange) {
         range = document.body.createTextRange();
         range.setStart(startElement, 0);
-        range.setEnd(endElement, 0);
+        range.setEnd(endElement, 1);
+        if (range.startOffset === 1) {
+            range.setStart(endElement, 0);
+            range.setEnd(startElement, 1);
+        }
         range.select();
     } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
         range.setStart(startElement, 0);
         range.setEnd(endElement, 1);
-          console.log("RANGEd");
-        console.log(range);
-        if(range.startOffset === 1){
+        if (range.startOffset === 1) {
             range.setStart(endElement, 0);
             range.setEnd(startElement, 1);
         }
         selection.removeAllRanges();
         selection.addRange(range);
-        try {
-            var successful = document.execCommand('copy');
-            var msg = successful ? 'successful' : 'unsuccessful';
-        } catch (err) {
-            console.log('Oops, unable to copy');
-        }
+
+        copyToClipboard();
     }
 }
 
@@ -93,15 +92,16 @@ function selectTextSingleElement(startElement) {
         range.selectNodeContents(startElement);
         selection.removeAllRanges();
         selection.addRange(range);
-       // console.log("RANGE");
-       // console.log(range);
-        try {
-            var successful = document.execCommand('copy');
-            var msg = successful ? 'successful' : 'unsuccessful';
+        copyToClipboard();
+    }
+}
 
-        } catch (err) {
-            console.log('Oops, unable to copy');
-        }
 
+
+function copyToClipboard() {
+    try {
+        document.execCommand('copy');
+    } catch (err) {
+        console.log('Unable to copy');
     }
 }
