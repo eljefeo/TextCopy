@@ -5,7 +5,7 @@ var enabled = false,
     mouseY = 0;
 
 $(document).keydown(function(e) {
-    keys[event.keyCode] = true;
+    keys[e.keyCode] = true;
     if (keys[16] && keys[17]) {
         getEnabled();
         if (enabled) {
@@ -28,7 +28,7 @@ $(document).keydown(function(e) {
     }
 })
     .keyup(function(e) {
-        keys[event.keyCode] = false;
+        keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         mouseX = e.clientX;
