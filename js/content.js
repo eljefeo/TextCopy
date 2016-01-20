@@ -4,25 +4,14 @@ var enabled = false,
     mouseX = 0,
     mouseY = 0;
 
-function getEnabled() {
-    chrome.runtime.sendMessage({
-        greeting: "getEnabled"
-    }, function(response) {
-        enabled = response.result;
-    });
-}
-
-window.addEventListener("keydown", function(event) {
+$(document).keydown(function(e) {
     keys[event.keyCode] = true;
     if (keys[16] && keys[17]) {
-
         getEnabled();
-
         if (enabled) {
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         }
     } else if (keys[18] && keys[17]) {
-
         getEnabled();
         if (enabled) {
             if (elements.length == 2) {
@@ -37,19 +26,14 @@ window.addEventListener("keydown", function(event) {
             }
         }
     }
-
-}, false);
-
-
-$(document).mousemove(function(e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
-
-window.addEventListener("keyup", function(event) {
-    keys[event.keyCode] = false;
-}, false);
-
+})
+    .keyup(function(e) {
+        keys[event.keyCode] = false;
+    })
+    .mousemove(function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
 
 function selectTextTwoElements(startElement, endElement) {
     var doc = document,
@@ -74,7 +58,6 @@ function selectTextTwoElements(startElement, endElement) {
         }
         selection.removeAllRanges();
         selection.addRange(range);
-
         copyToClipboard();
     }
 }
@@ -96,7 +79,13 @@ function selectTextSingleElement(startElement) {
     }
 }
 
-
+function getEnabled() {
+    chrome.runtime.sendMessage({
+        greeting: "getEnabled"
+    }, function(response) {
+        enabled = response.result;
+    });
+}
 
 function copyToClipboard() {
     try {

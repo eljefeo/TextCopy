@@ -1,19 +1,14 @@
 $(function() {
-    chrome.runtime.sendMessage({
-        greeting: "getEnabled"
-    }, function(response) {
-        var enabled = response.result;
-        updateFront(enabled);
-        
-    });
-
-    $('#switchEnable').on('click', function(e) {
+    var talkToBack = function(text) {
         chrome.runtime.sendMessage({
-            greeting: "changeEnabled"
+            greeting: text
         }, function(response) {
-            var enabled = response.result;
-        updateFront(enabled);
+            updateFront(response.result);
         });
+    }
+    talkToBack("getEnabled");
+    $('#switchEnable').on('click', function(e) {
+        talkToBack("changeEnabled");
     });
 });
 
