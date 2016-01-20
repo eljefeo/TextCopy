@@ -47,6 +47,7 @@ function selectTextTwoElements(startElement, endElement) {
             range.setEnd(startElement, 1);
         }
         range.select();
+        copyToClipboard();
     } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
@@ -69,6 +70,7 @@ function selectTextSingleElement(startElement) {
         range = document.body.createTextRange();
         range.moveToElementText(startElement);
         range.select();
+        copyToClipboard();
     } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
