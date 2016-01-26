@@ -6,6 +6,8 @@ var enabled = false,
 
 $(document).keydown(function(e) {
     keys[e.keyCode] = true;
+})
+    .keyup(function(e) {
     if (keys[16] && keys[17]) {
         getEnabled();
         if (enabled) {
@@ -26,8 +28,6 @@ $(document).keydown(function(e) {
             }
         }
     }
-})
-    .keyup(function(e) {
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
