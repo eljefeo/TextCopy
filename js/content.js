@@ -12,7 +12,7 @@ $(document).keydown(function(e) {
     //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
     if (keyDownTimes[e.keyCode] - keyUpTimes[e.keycode] <= cushionTime) {
         keys[e.keyCode] = false;
-        console.log("detected stick...");
+        console.log("TEXTCOPY *********** detected stick...");
     } else {
         keys[e.keyCode] = true;
     }
