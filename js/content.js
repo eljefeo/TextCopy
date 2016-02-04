@@ -1,38 +1,50 @@
 var enabled = false,
     keys = [],
+    keyDownTimes = [],
+    keyUpTimes = [],
     elements = [],
+    cushionTime = 100,
     mouseX = 0,
     mouseY = 0;
 
 $(document).keydown(function(e) {
-    keys[e.keyCode] = true;
+    keyDownTimes[e.keyCode] = new Date().getTime();
+    //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
+    if (keyDownTimes[e.keyCode] - keyUpTimes[e.keycode] <= cushionTime) {
+        keys[e.keyCode] = false;
+        console.log("detected stick...");
+    } else {
+        keys[e.keyCode] = true;
+    }
 })
     .keyup(function(e) {
-    if (keys[16] && keys[17]) {
-        getEnabled();
-        if (enabled) {
-            selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
+        keyUpTimes[e.keyCode] = new Date().getTime();
+        if (keys[16] && keys[17]) {
+            getEnabled();
+            if (enabled) {
+                selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
+            }
+        } else if (keys[18] && keys[17]) {
+            getEnabled();
+            if (enabled) {
+                if (elements.length == 2) {
+                    elements = [];
+                }
+                elements.push(document.elementFromPoint(mouseX, mouseY));
+                if (elements.length == 1) {
+                    selectTextSingleElement(elements[0]);
+                }
+                if (elements.length == 2) {
+                    selectTextTwoElements(elements[0], elements[1]);
+                }
+            }
         }
-    } else if (keys[18] && keys[17]) {
-        getEnabled();
-        if (enabled) {
-            if (elements.length == 2) {
-                elements = [];
-            }
-            elements.push(document.elementFromPoint(mouseX, mouseY));
-            if (elements.length == 1) {
-                selectTextSingleElement(elements[0]);
-            }
-            if (elements.length == 2) {
-                selectTextTwoElements(elements[0], elements[1]);
-            }
-        }
-    }
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         mouseX = e.clientX;
         mouseY = e.clientY;
+
     });
 
 function selectTextTwoElements(startElement, endElement) {
