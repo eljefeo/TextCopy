@@ -10,7 +10,8 @@ var enabled = false,
 $(document).keydown(function(e) {
     keyDownTimes[e.keyCode] = new Date().getTime();
     //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
-    if (keyDownTimes[e.keyCode] - keyUpTimes[e.keycode] <= cushionTime) {
+    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keycode]; 
+    if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
         console.log("TEXTCOPY *********** detected stick...");
     } else {
@@ -27,14 +28,14 @@ $(document).keydown(function(e) {
         } else if (keys[18] && keys[17]) {
             getEnabled();
             if (enabled) {
-                if (elements.length == 2) {
+                if (elements.length === 2) {
                     elements = [];
                 }
                 elements.push(document.elementFromPoint(mouseX, mouseY));
-                if (elements.length == 1) {
+                if (elements.length === 1) {
                     selectTextSingleElement(elements[0]);
                 }
-                if (elements.length == 2) {
+                if (elements.length === 2) {
                     selectTextTwoElements(elements[0], elements[1]);
                 }
             }
