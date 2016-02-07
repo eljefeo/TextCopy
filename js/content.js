@@ -10,7 +10,7 @@ var enabled = false,
 $(document).keydown(function(e) {
     keyDownTimes[e.keyCode] = new Date().getTime();
     //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
-    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keycode]; 
+    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode]; 
     if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
         console.log("TEXTCOPY *********** detected stick...");
