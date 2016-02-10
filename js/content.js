@@ -37,7 +37,7 @@ function selectText(arr) {
             range = document.createRange();
             range.setStart(arr[0], 0);
             range.setEnd(arr[1], 1);
-            if (range.startOffset === 1) {
+            if (range.startOffset) {
                 range.setStart(arr[1], 0);
                 range.setEnd(arr[0], 1);
             }
