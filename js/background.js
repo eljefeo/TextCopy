@@ -4,6 +4,7 @@ chrome.runtime.onMessage.addListener(
         if (request.greeting === "changeEnabled") {
             enabled = !enabled;
             console.log("Change enabled " + enabled);
+            sendDetails(enabled);
             sendResponse({
                 result: enabled
             });
@@ -14,3 +15,15 @@ chrome.runtime.onMessage.addListener(
             });
         }
     });
+
+function sendDetails(sendData) {
+    //Select tab
+    chrome.tabs.query({}, function(tabs) {
+        for (var i = 0; i < tabs.length; ++i) {
+            chrome.tabs.sendMessage(tabs[i].id, {
+                greeting: 'updateEnabled',
+                result: enabled
+            }, function(response) {});
+        }
+    });
+}

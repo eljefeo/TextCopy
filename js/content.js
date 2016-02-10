@@ -8,12 +8,11 @@ var enabled = false,
     mouseY = 0;
 
 $(function() {
-    getEnabled();
+    //getEnabled();
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
-    console.log('window lost focus, resetting keys');
     if (keys) {
         for (var i = 0; i < keys.length; i++) {
             keys[i] = false;
@@ -27,29 +26,16 @@ $(document).keydown(function(e) {
     var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
     if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
-        console.log("TEXTCOPY *********** detected stick...");
     } else {
         keys[e.keyCode] = true;
     }
 })
     .keyup(function(e) {
-        keyUpTimes[e.keyCode] = new Date().getTime();
-        if (keys[16] && keys[17]) {
-            chrome.runtime.sendMessage({
-                greeting: "getEnabled"
-            }, function(response) {
-                enabled = response.result;
-            });
-            if (enabled) {
+        if (enabled) {
+            keyUpTimes[e.keyCode] = new Date().getTime();
+            if (keys[16] && keys[17]) {
                 selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
-            }
-        } else if (keys[18] && keys[17]) {
-            chrome.runtime.sendMessage({
-                greeting: "getEnabled"
-            }, function(response) {
-                enabled = response.result;
-            });
-            if (enabled) {
+            } else if (keys[18] && keys[17]) {
                 if (elements.length === 2) {
                     elements = [];
                 }
@@ -61,8 +47,8 @@ $(document).keydown(function(e) {
                     selectTextTwoElements(elements[0], elements[1]);
                 }
             }
+            keys[e.keyCode] = false;
         }
-        keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         mouseX = e.clientX;
@@ -116,14 +102,6 @@ function selectTextSingleElement(startElement) {
     }
 }
 
-function getEnabled() {
-    chrome.runtime.sendMessage({
-        greeting: "getEnabled"
-    }, function(response) {
-        enabled = response.result;
-    });
-}
-
 function copyToClipboard() {
     try {
         document.execCommand('copy');
@@ -131,3 +109,10 @@ function copyToClipboard() {
         console.log('Unable to copy');
     }
 }
+
+//listen for updates from background
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.greeting && request.greeting === 'updateEnabled') {
+        enabled = request.result;
+    }
+});
