@@ -3,14 +3,28 @@ var enabled = false,
     keyDownTimes = [],
     keyUpTimes = [],
     elements = [],
-    cushionTime = 100,
+    cushionTime = 50,
     mouseX = 0,
     mouseY = 0;
+
+$(function() {
+    getEnabled();
+});
+
+//reset the keys on window blur to avoid losing a keyUp when switching windows
+$(window).blur(function() {
+    console.log('window lost focus, resetting keys');
+    if (keys) {
+        for (var i = 0; i < keys.length; i++) {
+            keys[i] = false;
+        }
+    }
+});
 
 $(document).keydown(function(e) {
     keyDownTimes[e.keyCode] = new Date().getTime();
     //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
-    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode]; 
+    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
     if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
         console.log("TEXTCOPY *********** detected stick...");
@@ -21,12 +35,20 @@ $(document).keydown(function(e) {
     .keyup(function(e) {
         keyUpTimes[e.keyCode] = new Date().getTime();
         if (keys[16] && keys[17]) {
-            getEnabled();
+            chrome.runtime.sendMessage({
+                greeting: "getEnabled"
+            }, function(response) {
+                enabled = response.result;
+            });
             if (enabled) {
                 selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
             }
         } else if (keys[18] && keys[17]) {
-            getEnabled();
+            chrome.runtime.sendMessage({
+                greeting: "getEnabled"
+            }, function(response) {
+                enabled = response.result;
+            });
             if (enabled) {
                 if (elements.length === 2) {
                     elements = [];
