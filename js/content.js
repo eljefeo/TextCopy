@@ -43,15 +43,14 @@ function selectText(arr) {
             }
             selection.removeAllRanges();
             selection.addRange(range);
-            copyToClipboard();
         } else {
             selection = window.getSelection();
             range = document.createRange();
             range.selectNodeContents(arr[0]);
             selection.removeAllRanges();
             selection.addRange(range);
-            copyToClipboard();
         }
+        copyToClipboard();
     }
 }
 
