@@ -8,6 +8,7 @@ var enabled = false,
     mouseY = 0;
 
 $(window).blur(function() {
+    elements = [];
     for (var i = 0; i < keys.length; i++)
         keys[i] = false;
 });
@@ -32,24 +33,20 @@ $(document).keydown(function(e) {
 
 function selectText(arr) {
     if (arr && arr.length < 3 && window.getSelection) {
-        if (arr[1]) {
-            selection = window.getSelection();
-            range = document.createRange();
+        selection = window.getSelection();
+        range = document.createRange();
+        if (!arr[1]) {
+            range.selectNodeContents(arr[0]);
+        } else {
             range.setStart(arr[0], 0);
             range.setEnd(arr[1], 1);
             if (range.startOffset) {
                 range.setStart(arr[1], 0);
                 range.setEnd(arr[0], 1);
             }
-            selection.removeAllRanges();
-            selection.addRange(range);
-        } else {
-            selection = window.getSelection();
-            range = document.createRange();
-            range.selectNodeContents(arr[0]);
-            selection.removeAllRanges();
-            selection.addRange(range);
         }
+        selection.removeAllRanges();
+        selection.addRange(range);
         copyToClipboard();
     }
 }
