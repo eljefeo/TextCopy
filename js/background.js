@@ -3,7 +3,11 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.greeting === "changeEnabled") {
             enabled = !enabled;
+<<<<<<< HEAD
             updateTabsEnabledStatus(enabled);
+=======
+            console.log("Change enabled " + enabled);
+>>>>>>> parent of fbe9a9e... fixed async issue for on off timing
             sendResponse({
                 result: enabled
             });
@@ -12,6 +16,7 @@ chrome.runtime.onMessage.addListener(
                 result: enabled
             });
         }
+<<<<<<< HEAD
     });
 
 function updateTabsEnabledStatus(sendData) {
@@ -24,3 +29,6 @@ function updateTabsEnabledStatus(sendData) {
         }
     });
 }
+=======
+    });
+>>>>>>> parent of fbe9a9e... fixed async issue for on off timing
