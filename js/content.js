@@ -7,66 +7,35 @@ var enabled = false,
     mouseX = 0,
     mouseY = 0;
 
-<<<<<<< HEAD
-$(window).blur(function() {
-    elements = [];
-    for (var i = 0; i < keys.length; i++)
-        keys[i] = false;
-=======
 $(function() {
-    getEnabled();
+    //getEnabled();
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
-    console.log('window lost focus, resetting keys');
     if (keys) {
         for (var i = 0; i < keys.length; i++) {
             keys[i] = false;
         }
     }
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing
 });
 
 $(document).keydown(function(e) {
     keyDownTimes[e.keyCode] = new Date().getTime();
-<<<<<<< HEAD
-    keys[e.keyCode] = (!keyUpTimes[e.keyCode] || keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode] > cushionTime);
-})
-    .keyup(function(e) {
-        keyUpTimes[e.keyCode] = new Date().getTime();
-        if (enabled && keys[17] && (keys[16] || keys[18])) {
-            elements = keys[16] || (keys[18] && elements.length > 1) ? [] : elements;
-            elements.push(document.elementFromPoint(mouseX, mouseY));
-            selectText(elements);
-=======
     //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
     var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
     if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
-        console.log("TEXTCOPY *********** detected stick...");
     } else {
         keys[e.keyCode] = true;
     }
 })
     .keyup(function(e) {
-        keyUpTimes[e.keyCode] = new Date().getTime();
-        if (keys[16] && keys[17]) {
-            chrome.runtime.sendMessage({
-                greeting: "getEnabled"
-            }, function(response) {
-                enabled = response.result;
-            });
-            if (enabled) {
+        if (enabled) {
+            keyUpTimes[e.keyCode] = new Date().getTime();
+            if (keys[16] && keys[17]) {
                 selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
-            }
-        } else if (keys[18] && keys[17]) {
-            chrome.runtime.sendMessage({
-                greeting: "getEnabled"
-            }, function(response) {
-                enabled = response.result;
-            });
-            if (enabled) {
+            } else if (keys[18] && keys[17]) {
                 if (elements.length === 2) {
                     elements = [];
                 }
@@ -78,28 +47,36 @@ $(document).keydown(function(e) {
                     selectTextTwoElements(elements[0], elements[1]);
                 }
             }
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing
+            keys[e.keyCode] = false;
         }
-        keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         mouseX = e.clientX;
         mouseY = e.clientY;
+
     });
 
-function selectText(arr) {
-    if (arr && arr.length < 3 && window.getSelection) {
+function selectTextTwoElements(startElement, endElement) {
+    var doc = document,
+        range, selection;
+    if (doc.body.createTextRange) {
+        range = document.body.createTextRange();
+        range.setStart(startElement, 0);
+        range.setEnd(endElement, 1);
+        if (range.startOffset === 1) {
+            range.setStart(endElement, 0);
+            range.setEnd(startElement, 1);
+        }
+        range.select();
+        copyToClipboard();
+    } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
-        if (!arr[1]) {
-            range.selectNodeContents(arr[0]);
-        } else {
-            range.setStart(arr[0], 0);
-            range.setEnd(arr[1], 1);
-            if (range.startOffset) {
-                range.setStart(arr[1], 0);
-                range.setEnd(arr[0], 1);
-            }
+        range.setStart(startElement, 0);
+        range.setEnd(endElement, 1);
+        if (range.startOffset === 1) {
+            range.setStart(endElement, 0);
+            range.setEnd(startElement, 1);
         }
         selection.removeAllRanges();
         selection.addRange(range);
@@ -107,8 +84,6 @@ function selectText(arr) {
     }
 }
 
-<<<<<<< HEAD
-=======
 function selectTextSingleElement(startElement) {
     var doc = document,
         range, selection;
@@ -127,28 +102,17 @@ function selectTextSingleElement(startElement) {
     }
 }
 
-function getEnabled() {
-    chrome.runtime.sendMessage({
-        greeting: "getEnabled"
-    }, function(response) {
-        enabled = response.result;
-    });
-}
-
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing
 function copyToClipboard() {
     try {
         document.execCommand('copy');
     } catch (err) {
         console.log('Unable to copy');
     }
-<<<<<<< HEAD
 }
 
+//listen for updates from background
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.greeting && request.greeting === 'updateEnabled')
+    if (request.greeting && request.greeting === 'updateEnabled') {
         enabled = request.result;
+    }
 });
-=======
-}
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing

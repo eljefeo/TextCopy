@@ -3,32 +3,27 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.greeting === "changeEnabled") {
             enabled = !enabled;
-<<<<<<< HEAD
-            updateTabsEnabledStatus(enabled);
-=======
             console.log("Change enabled " + enabled);
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing
+            sendDetails(enabled);
             sendResponse({
                 result: enabled
             });
         } else if (request.greeting === "getEnabled") {
+            console.log("get enabled " + enabled);
             sendResponse({
                 result: enabled
             });
         }
-<<<<<<< HEAD
     });
 
-function updateTabsEnabledStatus(sendData) {
+function sendDetails(sendData) {
+    //Select tab
     chrome.tabs.query({}, function(tabs) {
         for (var i = 0; i < tabs.length; ++i) {
             chrome.tabs.sendMessage(tabs[i].id, {
                 greeting: 'updateEnabled',
                 result: enabled
-            });
+            }, function(response) {});
         }
     });
 }
-=======
-    });
->>>>>>> parent of fbe9a9e... fixed async issue for on off timing
