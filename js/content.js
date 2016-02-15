@@ -1,54 +1,81 @@
 var enabled = false,
+    otherKeyPressed = false,
     keys = [],
     keyDownTimes = [],
     keyUpTimes = [],
     elements = [],
-    cushionTime = 50,
+    cushionTime = 100,
     mouseX = 0,
     mouseY = 0;
 
 $(function() {
-    //getEnabled();
+    getEnabled();
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
+    elements = [];
     if (keys) {
-        for (var i = 0; i < keys.length; i++) {
-            keys[i] = false;
-        }
+        console.log("window blur, resetting all keys");
+        resetAllKeys();
     }
 });
 
+
 $(document).keydown(function(e) {
-    keyDownTimes[e.keyCode] = new Date().getTime();
-    //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
-    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
-    if (diff <= cushionTime && diff > 0) {
-        keys[e.keyCode] = false;
-    } else {
-        keys[e.keyCode] = true;
-    }
-})
+        keyDownTimes[e.keyCode] = new Date().getTime();
+        if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
+            otherKeyPressed = true;
+            console.log("Pressing extra keys ? " + e.keyCode);
+            return;
+        }
+
+        //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
+        var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
+        if (diff <= cushionTime && diff > 0) {
+            keys[e.keyCode] = false;
+            console.log("TEXTCOPY *********** detected stick...");
+        } else {
+            keys[e.keyCode] = true;
+        }
+    })
     .keyup(function(e) {
-        if (enabled) {
-            keyUpTimes[e.keyCode] = new Date().getTime();
-            if (keys[16] && keys[17]) {
+        keyUpTimes[e.keyCode] = new Date().getTime();
+
+        if (otherKeyPressed) {
+            console.log("other key is pressed (in keyup)");
+            //wait for all keys to be let up before resetting otherkeypressed
+            keys[e.keyCode] = false;
+            if (!isAnyKeyPressed()) {
+                console.log("resetting otherkey pressed ");
+                otherKeyPressed = false;
+            }
+            keys[e.keyCode] = false;
+            return;
+        } else if (keys[16] && keys[17]) {
+            getEnabled();
+            if (enabled) {
+                console.log("selecting single");
                 selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
-            } else if (keys[18] && keys[17]) {
+            }
+        } else if (keys[18] && keys[17]) {
+            getEnabled();
+            if (enabled) {
                 if (elements.length === 2) {
                     elements = [];
                 }
                 elements.push(document.elementFromPoint(mouseX, mouseY));
                 if (elements.length === 1) {
+                    console.log("selecting single again");
                     selectTextSingleElement(elements[0]);
                 }
                 if (elements.length === 2) {
+                    console.log("selecting two");
                     selectTextTwoElements(elements[0], elements[1]);
                 }
             }
-            keys[e.keyCode] = false;
         }
+        keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         mouseX = e.clientX;
@@ -102,6 +129,37 @@ function selectTextSingleElement(startElement) {
     }
 }
 
+function getEnabled() {
+    chrome.runtime.sendMessage({
+        greeting: "getEnabled"
+    }, function(response) {
+        enabled = response.result;
+    });
+}
+
+//listen for updates from background
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.greeting && request.greeting === 'updateEnabled') {
+        enabled = request.result;
+        console.log("Received update from background! enabled is now " + enabled);
+    }
+});
+
+function isAnyKeyPressed() {
+    for (var i = 0; i < keys.length; i++) {
+        if (keys[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function resetAllKeys() {
+    for (var i = 0; i < keys.length; i++) {
+        keys[i] = false;
+    }
+}
+
 function copyToClipboard() {
     try {
         document.execCommand('copy');
@@ -109,10 +167,3 @@ function copyToClipboard() {
         console.log('Unable to copy');
     }
 }
-
-//listen for updates from background
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.greeting && request.greeting === 'updateEnabled') {
-        enabled = request.result;
-    }
-});
