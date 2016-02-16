@@ -1,5 +1,6 @@
 var enabled = false,
     otherKeyPressed = false,
+    amIActive = false,
     keys = [],
     keyDownTimes = [],
     keyUpTimes = [],
@@ -10,35 +11,61 @@ var enabled = false,
 
 $(function() {
     getEnabled();
+    heyImInActive();
+    console.log('new tab start');
+
+
+});
+
+
+$(document).mouseleave(function() {
+    heyImInActive();
+    console.log('aaaaout');
+});
+$(document).mouseenter(function() {
+    heyImActive();
+    console.log('aaaain');
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
+    heyImInActive();
+    console.log('aaaablurr');
+
     elements = [];
     if (keys) {
         console.log("window blur, resetting all keys");
         resetAllKeys();
     }
 });
+$(window).focus(function() {
+    heyImActive();
+    console.log('aaaafocus');
+
+    console.log("This window is focused now. letting back know");
+})
+
+;
+
 
 
 $(document).keydown(function(e) {
-        keyDownTimes[e.keyCode] = new Date().getTime();
-        if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
-            otherKeyPressed = true;
-            console.log("Pressing extra keys ? " + e.keyCode);
-            return;
-        }
+    keyDownTimes[e.keyCode] = new Date().getTime();
+    if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
+        otherKeyPressed = true;
+        console.log("Pressing extra keys ? " + e.keyCode);
+        return;
+    }
 
-        //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
-        var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
-        if (diff <= cushionTime && diff > 0) {
-            keys[e.keyCode] = false;
-            console.log("TEXTCOPY *********** detected stick...");
-        } else {
-            keys[e.keyCode] = true;
-        }
-    })
+    //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
+    var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
+    if (diff <= cushionTime && diff > 0) {
+        keys[e.keyCode] = false;
+        console.log("TEXTCOPY *********** detected stick...");
+    } else {
+        keys[e.keyCode] = true;
+    }
+})
     .keyup(function(e) {
         keyUpTimes[e.keyCode] = new Date().getTime();
 
@@ -53,6 +80,7 @@ $(document).keydown(function(e) {
             keys[e.keyCode] = false;
             return;
         } else if (keys[16] && keys[17]) {
+
             getEnabled();
             if (enabled) {
                 console.log("selecting single");
@@ -78,6 +106,11 @@ $(document).keydown(function(e) {
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
+        if (!amIActive) {
+            heyImActive();
+            amIActive = true;
+        }
+
         mouseX = e.clientX;
         mouseY = e.clientY;
 
@@ -94,7 +127,8 @@ function selectTextTwoElements(startElement, endElement) {
             range.setStart(endElement, 0);
             range.setEnd(startElement, 1);
         }
-        range.select();
+        var textMaybe = range.select();
+        console.log("text 2 " + textMaybe);
         copyToClipboard();
     } else if (window.getSelection) {
         selection = window.getSelection();
@@ -106,12 +140,19 @@ function selectTextTwoElements(startElement, endElement) {
             range.setEnd(startElement, 1);
         }
         selection.removeAllRanges();
-        selection.addRange(range);
+
+        var textMaybe = selection.addRange(range);
+        console.log("text 2 " + textMaybe);
         copyToClipboard();
     }
 }
 
 function selectTextSingleElement(startElement) {
+    chrome.runtime.sendMessage({
+        greeting: "doOtherTabActive"
+    }, function(response) {
+        // enabled = response.result;
+    });
     var doc = document,
         range, selection;
     if (doc.body.createTextRange) {
@@ -159,6 +200,42 @@ function resetAllKeys() {
         keys[i] = false;
     }
 }
+
+
+function tellbackImInactive() {
+    console.log("This tab is blurred now. letting back know im last tab");
+
+    chrome.runtime.sendMessage({
+        greeting: "gotBlurred"
+    }, function(response) {
+        // enabled = response.result;
+    });
+}
+
+function heyImActive() {
+    if (!amIActive) {
+        amIActive = true;
+        console.log('tell back active now');
+        chrome.runtime.sendMessage({
+            greeting: "imActiveTab"
+        }, function(response) {
+        });
+    }
+
+}
+
+function heyImInActive() {
+    if (amIActive) {
+        amIActive = false;
+        console.log('tell back inActive now');
+        chrome.runtime.sendMessage({
+            greeting: "imInActiveTab"
+        }, function(response) {
+        });
+    }
+
+}
+
 
 function copyToClipboard() {
     try {
