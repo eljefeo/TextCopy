@@ -11,10 +11,8 @@ var enabled = false,
 
 $(function() {
     getEnabled();
-    heyImInActive();
+    heyImActive();
     console.log('new tab start');
-
-
 });
 
 
@@ -30,8 +28,6 @@ $(document).mouseenter(function() {
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
     heyImInActive();
-    console.log('aaaablurr');
-
     elements = [];
     if (keys) {
         console.log("window blur, resetting all keys");
@@ -40,9 +36,6 @@ $(window).blur(function() {
 });
 $(window).focus(function() {
     heyImActive();
-    console.log('aaaafocus');
-
-    console.log("This window is focused now. letting back know");
 })
 
 ;
@@ -110,7 +103,6 @@ $(document).keydown(function(e) {
             heyImActive();
             amIActive = true;
         }
-
         mouseX = e.clientX;
         mouseY = e.clientY;
 
@@ -127,8 +119,7 @@ function selectTextTwoElements(startElement, endElement) {
             range.setStart(endElement, 0);
             range.setEnd(startElement, 1);
         }
-        var textMaybe = range.select();
-        console.log("text 2 " + textMaybe);
+        range.select();
         copyToClipboard();
     } else if (window.getSelection) {
         selection = window.getSelection();
@@ -140,19 +131,12 @@ function selectTextTwoElements(startElement, endElement) {
             range.setEnd(startElement, 1);
         }
         selection.removeAllRanges();
-
-        var textMaybe = selection.addRange(range);
-        console.log("text 2 " + textMaybe);
+        selection.addRange(range);
         copyToClipboard();
     }
 }
 
 function selectTextSingleElement(startElement) {
-    chrome.runtime.sendMessage({
-        greeting: "doOtherTabActive"
-    }, function(response) {
-        // enabled = response.result;
-    });
     var doc = document,
         range, selection;
     if (doc.body.createTextRange) {
@@ -169,7 +153,6 @@ function selectTextSingleElement(startElement) {
         copyToClipboard();
     }
 }
-
 function getEnabled() {
     chrome.runtime.sendMessage({
         greeting: "getEnabled"
@@ -182,7 +165,7 @@ function getEnabled() {
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.greeting && request.greeting === 'updateEnabled') {
         enabled = request.result;
-        console.log("Received update from background! enabled is now " + enabled);
+        console.log("Front here: Received update from background, enabled is now " + enabled);
     }
 });
 
@@ -201,41 +184,27 @@ function resetAllKeys() {
     }
 }
 
-
-function tellbackImInactive() {
-    console.log("This tab is blurred now. letting back know im last tab");
-
-    chrome.runtime.sendMessage({
-        greeting: "gotBlurred"
-    }, function(response) {
-        // enabled = response.result;
-    });
-}
-
 function heyImActive() {
     if (!amIActive) {
         amIActive = true;
-        console.log('tell back active now');
+        console.log('Front here: telling back to make me active now');
         chrome.runtime.sendMessage({
             greeting: "imActiveTab"
         }, function(response) {
         });
     }
-
 }
 
 function heyImInActive() {
     if (amIActive) {
         amIActive = false;
-        console.log('tell back inActive now');
+        console.log('Front here: telling back to make me inactive now');
         chrome.runtime.sendMessage({
             greeting: "imInActiveTab"
         }, function(response) {
         });
     }
-
 }
-
 
 function copyToClipboard() {
     try {
