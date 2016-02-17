@@ -4,6 +4,10 @@ $(function() {
             greeting: text
         }, function(response) {
             updateFront(response.result);
+            var enabled = response.result;
+            document.getElementById("spanButtonChange").innerHTML = enabled ? "Off" : "On";
+    document.getElementById("spanStatus").className = enabled ? "label label-success" : "label label-warning";
+    document.getElementById("spanStatus").innerHTML = enabled ? "On" : "Off";
         });
     }
     talkToBack("getEnabled");
@@ -13,7 +17,5 @@ $(function() {
 });
 
 function updateFront(enabled) {
-    document.getElementById("spanButtonChange").innerHTML = enabled ? "Off" : "On";
-    document.getElementById("spanStatus").className = enabled ? "label label-success" : "label label-warning";
-    document.getElementById("spanStatus").innerHTML = enabled ? "On" : "Off";
+    
 }

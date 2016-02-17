@@ -5,7 +5,7 @@ var enabled = false,
     keyDownTimes = [],
     keyUpTimes = [],
     elements = [],
-    cushionTime = 100,
+    cushionTime = 20,
     mouseX = 0,
     mouseY = 0;
 
@@ -30,7 +30,7 @@ $(window).blur(function() {
     }
 });
 $(window).focus(function() {
-    heyIHaveTheMouse();
+   // heyIHaveTheMouse();
 });
 
 $(document).keydown(function(e) {
@@ -57,29 +57,24 @@ $(document).keydown(function(e) {
             keys[e.keyCode] = false;
             return;
         } else if (keys[16] && keys[17]) {
-            getEnabled();
+            console.log("ctrl+shift");
             if (enabled) {
-                chrome.runtime.sendMessage({
-                    greeting: "doSingleSelect"
-                }, function(response) {});
+                messageBackground("doSingleSelect");
             }
         } else if (keys[18] && keys[17]) {
-            getEnabled();
+            console.log("ctrl+alt");
             if (enabled) {
-                chrome.runtime.sendMessage({
-                    greeting: "doRangeSelect"
-                }, function(response) {});
+                messageBackground("doRangeSelect");
             }
         }
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
-        if (!amIActive) {
-            heyIHaveTheMouse();
-            amIActive = true;
-        }
+       heyIHaveTheMouse();
         mouseX = e.clientX;
         mouseY = e.clientY;
+        console.log(mouseX + " "+ mouseY);
+        console.log(amIActive);
     });
 
 function selectTextTwoElements(startElement, endElement) {
@@ -142,20 +137,22 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.greeting === 'updateEnabled') {
             enabled = request.result;
         } else if (request.greeting === "doSelectSingle") {
+            console.log("I was told to do single select");
+
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         } else if (request.greeting === "doSelectRange") {
-            if (elements.length === 2) {
+            console.log("I was told to do range select");
+
+            if (elements.length === 2)
                 elements = [];
-            }
             elements.push(document.elementFromPoint(mouseX, mouseY));
-            if (elements.length === 1) {
+            if (elements.length === 1)
                 selectTextSingleElement(elements[0]);
-            }
-            if (elements.length === 2) {
+            if (elements.length === 2)
                 selectTextTwoElements(elements[0], elements[1]);
-            }
         }
     }
+    return true;
 });
 
 function isAnyKeyPressed() {
@@ -171,15 +168,16 @@ function resetAllKeys() {
 }
 
 function heyIHaveTheMouse() {
-    if (!amIActive) {
+    //if (!amIActive) {
+        console.log("I have the mouse");
         amIActive = true;
-        chrome.runtime.sendMessage({
-            greeting: "imActiveTab"
-        }, function(response) {});
-    }
+        messageBackground("imActiveTab");
+    //}
 }
 
 function heyILostTheMouse() {
+    console.log("I lost the mouse");
+
     amIActive = false;
 }
 
@@ -189,4 +187,12 @@ function copyToClipboard() {
     } catch (err) {
         console.log('Unable to copy');
     }
+}
+
+function messageBackground(msg) {
+    console.log("telling background " + msg);
+    chrome.runtime.sendMessage({
+        greeting: msg
+    }, function(response) {});
+
 }
