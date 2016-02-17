@@ -11,101 +11,75 @@ var enabled = false,
 
 $(function() {
     getEnabled();
-    heyImActive();
-    console.log('new tab start');
+    heyIHaveTheMouse();
 });
-
 
 $(document).mouseleave(function() {
-    heyImInActive();
-    console.log('aaaaout');
+    heyILostTheMouse();
 });
 $(document).mouseenter(function() {
-    heyImActive();
-    console.log('aaaain');
+    heyIHaveTheMouse();
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
-    heyImInActive();
+    heyILostTheMouse();
     elements = [];
     if (keys) {
-        console.log("window blur, resetting all keys");
         resetAllKeys();
     }
 });
 $(window).focus(function() {
-    heyImActive();
-})
-
-;
-
-
+    heyIHaveTheMouse();
+});
 
 $(document).keydown(function(e) {
     keyDownTimes[e.keyCode] = new Date().getTime();
     if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
         otherKeyPressed = true;
-        console.log("Pressing extra keys ? " + e.keyCode);
         return;
     }
-
-    //  console.log('press ' + e.keyCode + ", keyDownTime = "+ keyDownTimes[e.keyCode]);
     var diff = keyDownTimes[e.keyCode] - keyUpTimes[e.keyCode];
     if (diff <= cushionTime && diff > 0) {
         keys[e.keyCode] = false;
-        console.log("TEXTCOPY *********** detected stick...");
     } else {
         keys[e.keyCode] = true;
     }
 })
     .keyup(function(e) {
         keyUpTimes[e.keyCode] = new Date().getTime();
-
         if (otherKeyPressed) {
-            console.log("other key is pressed (in keyup)");
             //wait for all keys to be let up before resetting otherkeypressed
             keys[e.keyCode] = false;
             if (!isAnyKeyPressed()) {
-                console.log("resetting otherkey pressed ");
                 otherKeyPressed = false;
             }
             keys[e.keyCode] = false;
             return;
         } else if (keys[16] && keys[17]) {
-
             getEnabled();
             if (enabled) {
-                console.log("selecting single");
-                selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
+                chrome.runtime.sendMessage({
+                    greeting: "doSingleSelect"
+                }, function(response) {});
             }
         } else if (keys[18] && keys[17]) {
             getEnabled();
             if (enabled) {
-                if (elements.length === 2) {
-                    elements = [];
-                }
-                elements.push(document.elementFromPoint(mouseX, mouseY));
-                if (elements.length === 1) {
-                    console.log("selecting single again");
-                    selectTextSingleElement(elements[0]);
-                }
-                if (elements.length === 2) {
-                    console.log("selecting two");
-                    selectTextTwoElements(elements[0], elements[1]);
-                }
+                chrome.runtime.sendMessage({
+                    greeting: "doRangeSelect"
+                }, function(response) {});
             }
         }
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
         if (!amIActive) {
-            heyImActive();
+            heyIHaveTheMouse();
             amIActive = true;
         }
         mouseX = e.clientX;
         mouseY = e.clientY;
-
     });
 
 function selectTextTwoElements(startElement, endElement) {
@@ -153,6 +127,7 @@ function selectTextSingleElement(startElement) {
         copyToClipboard();
     }
 }
+
 function getEnabled() {
     chrome.runtime.sendMessage({
         greeting: "getEnabled"
@@ -163,47 +138,49 @@ function getEnabled() {
 
 //listen for updates from background
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.greeting && request.greeting === 'updateEnabled') {
-        enabled = request.result;
-        console.log("Front here: Received update from background, enabled is now " + enabled);
+    if (request.greeting) {
+        if (request.greeting === 'updateEnabled') {
+            enabled = request.result;
+        } else if (request.greeting === "doSelectSingle") {
+            selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
+        } else if (request.greeting === "doSelectRange") {
+            if (elements.length === 2) {
+                elements = [];
+            }
+            elements.push(document.elementFromPoint(mouseX, mouseY));
+            if (elements.length === 1) {
+                selectTextSingleElement(elements[0]);
+            }
+            if (elements.length === 2) {
+                selectTextTwoElements(elements[0], elements[1]);
+            }
+        }
     }
 });
 
 function isAnyKeyPressed() {
-    for (var i = 0; i < keys.length; i++) {
-        if (keys[i]) {
+    for (var i = 0; i < keys.length; i++)
+        if (keys[i])
             return true;
-        }
-    }
     return false;
 }
 
 function resetAllKeys() {
-    for (var i = 0; i < keys.length; i++) {
+    for (var i = 0; i < keys.length; i++)
         keys[i] = false;
-    }
 }
 
-function heyImActive() {
+function heyIHaveTheMouse() {
     if (!amIActive) {
         amIActive = true;
-        console.log('Front here: telling back to make me active now');
         chrome.runtime.sendMessage({
             greeting: "imActiveTab"
-        }, function(response) {
-        });
+        }, function(response) {});
     }
 }
 
-function heyImInActive() {
-    if (amIActive) {
-        amIActive = false;
-        console.log('Front here: telling back to make me inactive now');
-        chrome.runtime.sendMessage({
-            greeting: "imInActiveTab"
-        }, function(response) {
-        });
-    }
+function heyILostTheMouse() {
+    amIActive = false;
 }
 
 function copyToClipboard() {
