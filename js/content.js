@@ -169,7 +169,7 @@ function resetAllKeys() {
 
 function heyIHaveTheMouse() {
     //if (!amIActive) {
-        console.log("I have the mouse");
+        //console.log("I have the mouse");
         amIActive = true;
         messageBackground("imActiveTab");
     //}
