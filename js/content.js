@@ -73,8 +73,8 @@ $(document).keydown(function(e) {
        heyIHaveTheMouse();
         mouseX = e.clientX;
         mouseY = e.clientY;
-        console.log(mouseX + " "+ mouseY);
-        console.log(amIActive);
+       // console.log(mouseX + " "+ mouseY);
+        //console.log(amIActive);
     });
 
 function selectTextTwoElements(startElement, endElement) {
