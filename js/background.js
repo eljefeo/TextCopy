@@ -1,3 +1,4 @@
+//test comment
 var enabled = true,
     preventCloseEnabled = false,
     tabToCopy = 0,
@@ -10,6 +11,7 @@ chrome.windows.onRemoved.addListener(function(windowid) {
     myWindows.splice(ind, 1);
     console.log('window closed : id= ' + windowid);
  //confirm("Press a button!");
+
 });
 
 chrome.windows.onCreated.addListener(function(windowid) {
