@@ -1,6 +1,6 @@
 var enabled = false,
-    preventCloseEnabled = false,
     otherKeyPressed = false,
+    amIActive = false,
     keys = [],
     keyDownTimes = [],
     keyUpTimes = [],
@@ -9,79 +9,33 @@ var enabled = false,
     mouseX = 0,
     mouseY = 0;
 
-//function PopIt() { return "Are you sure you want to leave?"; console.log('hmmm trying to close');}
-//function UnPopIt()  { /* nothing to return */ }
-
-/*$(document).ready(function() {
-    window.onbeforeunload = PopIt;
-    $("a").click(function(){ window.onbeforeunload = UnPopIt; });
-});*/
-
-
-
-
 $(function() {
-
     getEnabled();
-    getPreventCloseEnabled();
     heyIHaveTheMouse();
-
-   /* $('head').append('<link rel="stylesheet" href="sidebar.css" type="text/css" />');
-
-    // Set this variable with the height of your sidebar + header
-    var offsetPixels = 700; 
-
-    $(window).scroll(function() {
-        if ($(window).scrollTop() > offsetPixels) {
-            $( ".scrollingBox" ).css({
-                "position": "fixed",
-                "top": "15px"
-            });
-        } else {
-            $( ".scrollingBox" ).css({
-                "position": "static"
-            });
-        }
-    });*/
 });
 
-//window.onunload = function(){}
-
-/*window.onbeforeunload = function() {
-    if(preventCloseEnabled){
-       // changePreventCloseEnabled();
-        return "Would you really like to close?"; 
-    }
-}
-*/
-
+$(document).mouseleave(function() {
+    heyILostTheMouse();
+});
 $(document).mouseenter(function() {
     heyIHaveTheMouse();
-    sendGreetingToBackground("changeSelected");
 });
 
 //reset the keys on window blur to avoid losing a keyUp when switching windows
 $(window).blur(function() {
+    heyILostTheMouse();
     elements = [];
     if (keys) {
         resetAllKeys();
     }
 });
+$(window).focus(function() {
+   // heyIHaveTheMouse();
+});
 
 $(document).keydown(function(e) {
-    console.log('pressed ' + e.keyCode);
-
-       if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) { 
-        e.preventDefault();
-       $.get(chrome.extension.getURL('/sidebar.html'), function(data) {
-    //$(data).appendTo('body');
-    // Or if you're using jQuery 1.8+:
-    $($.parseHTML(data)).appendTo('body');
-});
-    }
-
     keyDownTimes[e.keyCode] = new Date().getTime();
-    if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18 && e.keyCode != 70) {
+    if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
         otherKeyPressed = true;
         return;
     }
@@ -91,12 +45,6 @@ $(document).keydown(function(e) {
     } else {
         keys[e.keyCode] = true;
     }
-
-    if(keys[17] && keys[70]){
-        console.log('!!!ctrl f is pressed');
-    }
-
-
 })
     .keyup(function(e) {
         keyUpTimes[e.keyCode] = new Date().getTime();
@@ -109,22 +57,25 @@ $(document).keydown(function(e) {
             keys[e.keyCode] = false;
             return;
         } else if (keys[16] && keys[17]) {
+            console.log("ctrl+shift");
             if (enabled) {
-                sendGreetingToBackground("doSingleSelect");
+                messageBackground("doSingleSelect");
             }
         } else if (keys[18] && keys[17]) {
+            console.log("ctrl+alt");
             if (enabled) {
-                sendGreetingToBackground("doRangeSelect");
+                messageBackground("doRangeSelect");
             }
         }
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
-        heyIHaveTheMouse();
+       heyIHaveTheMouse();
         mouseX = e.clientX;
         mouseY = e.clientY;
+       // console.log(mouseX + " "+ mouseY);
+        //console.log(amIActive);
     });
-
 
 function selectTextTwoElements(startElement, endElement) {
     var doc = document,
@@ -180,30 +131,18 @@ function getEnabled() {
     });
 }
 
-function getPreventCloseEnabled() {
-    chrome.runtime.sendMessage({
-        greeting: "getPreventCloseEnabled"
-    }, function(response) {
-        preventCloseEnabled = response.otherResult;
-    });
-}
-
-function changePreventCloseEnabled() {
-    chrome.runtime.sendMessage({
-        greeting: "changePreventCloseEnabled"
-    }, function(response) {
-        preventCloseEnabled = response.otherResult;
-    });
-}
-
 //listen for updates from background
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.greeting) {
         if (request.greeting === 'updateEnabled') {
             enabled = request.result;
         } else if (request.greeting === "doSelectSingle") {
+            console.log("I was told to do single select");
+
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         } else if (request.greeting === "doSelectRange") {
+            console.log("I was told to do range select");
+
             if (elements.length === 2)
                 elements = [];
             elements.push(document.elementFromPoint(mouseX, mouseY));
@@ -211,8 +150,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 selectTextSingleElement(elements[0]);
             if (elements.length === 2)
                 selectTextTwoElements(elements[0], elements[1]);
-        } else if(request.greeting === "updatePreventCloseEnabled") {
-            preventCloseEnabled = request.result;
         }
     }
     return true;
@@ -231,15 +168,31 @@ function resetAllKeys() {
 }
 
 function heyIHaveTheMouse() {
-    sendGreetingToBackground("imActiveTab");
+    //if (!amIActive) {
+        //console.log("I have the mouse");
+        amIActive = true;
+        messageBackground("imActiveTab");
+    //}
+}
+
+function heyILostTheMouse() {
+    console.log("I lost the mouse");
+
+    amIActive = false;
 }
 
 function copyToClipboard() {
     try {
         document.execCommand('copy');
-    } catch (err) {}
+    } catch (err) {
+        console.log('Unable to copy');
+    }
 }
 
-function simulateESCKeyPress() {
-  jQuery.event.trigger({ type : 'keypress', which : 27 });
+function messageBackground(msg) {
+    console.log("telling background " + msg);
+    chrome.runtime.sendMessage({
+        greeting: msg
+    }, function(response) {});
+
 }

@@ -10,7 +10,7 @@
   <script src="js/popup.js"></script>
   <style type="text/css">
 body {
-  min-width: 500px;
+  min-width: 500px; /* your desired width */
   max-width: 100%;
   position: relative;
   vertical-align:middle;
@@ -21,23 +21,14 @@ body {
 <body>
 
 <div class="container">
-  <h1><span id="spanTextCopyText">Text Copy is:</span>
-  <span id="spanTextCopyStatus" class="label label-default"></span></h1>
-
-  <h1><span id="spanClose">Prevent Close is:</span>
-  <span id="spanCloseStatus" class="label label-default"></span></h1>
+  <h1><span id="spanOther">Text Copy is:</span>
+  <span id="spanStatus" class="label label-default"></span></h1>
 
   <div>
-    <button id="switchTextCopyEnable" type="button" class="btn btn-default">
+    <button id="switchEnable" type="button" class="btn btn-default">
     
-    <span id="spanTextCopyEnabled">Turn Text Copy </span>
-    <span id="spanTextCopyButtonChange">Off</span>
-
-  </button>
-      <button id="switchCloseEnable" type="button" class="btn btn-default">
-    
-    <span id="spanCloseEnabled">Turn Prevent Close </span>
-    <span id="spanCloseButtonChange">Off</span>
+    <span id="spanEnabled">Turn Text Copy </span>
+    <span id="spanButtonChange">Off</span>
 
   </button>
     <div id="status">
@@ -52,8 +43,6 @@ This will highlight the text at the location of your mouse cursor. The text with
 First select a peice of text with Ctrl+Alt, then select another piece of text with Ctrl+Alt and TextCopy will select the 2 peices of text and everything in between. The text will also be automatically copied to the clipboard.
 
 </p>
-    </div>
-    </div>
     </div>
 
 

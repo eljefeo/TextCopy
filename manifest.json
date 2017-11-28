@@ -1,7 +1,6 @@
 {
     "name": "Text Copy",
-    "short_name": "Text Copy",
-    "version": "0.0.2",
+    "version": "1",
     "description": "Copy all text in a tag",
     "background": {
         "scripts": ["js/background.js"]
@@ -20,12 +19,8 @@
         "default_popup": "popup.html"
     },
     "content_scripts": [{
-        "js": ["js/res/jquery-2.2.0.min.js", "js/content.js", "js/util.js"],
+        "js": ["js/res/jquery-2.2.0.min.js", "js/content.js"],
         "matches": ["http://*/*", "https://*/*"],
-        "css" : ["sidebar.css"],
         "persistent": true
-    }],
-     "web_accessible_resources": ["sidebar.html", "sidebar.css"]
-
-     
+    }]
 }
