@@ -62,7 +62,7 @@ $(document).keydown(function(e) {
                 messageBackground("doSingleSelect");
             }
         } else if (keys[18] && keys[17]) {
-            console.log("ctrl+alt");
+            //console.log("ctrl+alt");
             if (enabled) {
                 messageBackground("doRangeSelect");
             }
@@ -89,7 +89,7 @@ function selectTextTwoElements(startElement, endElement) {
             range.setEnd(startElement, 1);
         }
         range.select();
-        copyToClipboard();
+        copyToClipboard(range.toString());
     } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
@@ -101,7 +101,7 @@ function selectTextTwoElements(startElement, endElement) {
         }
         selection.removeAllRanges();
         selection.addRange(range);
-        copyToClipboard();
+        copyToClipboard(selection.toString());
     }
 }
 
@@ -112,14 +112,16 @@ function selectTextSingleElement(startElement) {
         range = document.body.createTextRange();
         range.moveToElementText(startElement);
         range.select();
-        copyToClipboard();
+        console.log(range);
+        copyToClipboard(range.toString());
     } else if (window.getSelection) {
         selection = window.getSelection();
         range = document.createRange();
         range.selectNodeContents(startElement);
         selection.removeAllRanges();
         selection.addRange(range);
-        copyToClipboard();
+        console.log(selection.toString());
+        copyToClipboard(selection.toString());
     }
 }
 
@@ -137,11 +139,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.greeting === 'updateEnabled') {
             enabled = request.result;
         } else if (request.greeting === "doSelectSingle") {
-            console.log("I was told to do single select");
+            //console.log("I was told to do single select");
 
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         } else if (request.greeting === "doSelectRange") {
-            console.log("I was told to do range select");
+            //console.log("I was told to do range select");
 
             if (elements.length === 2)
                 elements = [];
@@ -176,21 +178,31 @@ function heyIHaveTheMouse() {
 }
 
 function heyILostTheMouse() {
-    console.log("I lost the mouse");
+    //console.log("I lost the mouse");
 
     amIActive = false;
 }
 
-function copyToClipboard() {
+function copyToClipboard(selectedText) {
     try {
-        document.execCommand('copy');
+        //document.execCommand('copy');
+        //copy(getSelection().toString())
+        /*if(document.execCommand('copy')){
+            console.log('copied');
+        }
+        else{
+            console.log('not copied :(');
+        }*/
+        navigator.clipboard.writeText(selectedText)
+          .then(() => {
+            console.log('Text Copied');
+          });
     } catch (err) {
         console.log('Unable to copy');
     }
 }
 
 function messageBackground(msg) {
-    console.log("telling background " + msg);
     chrome.runtime.sendMessage({
         greeting: msg
     }, function(response) {});
