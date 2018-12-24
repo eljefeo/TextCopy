@@ -30,7 +30,7 @@ $(window).blur(function() {
     }
 });
 $(window).focus(function() {
-   // heyIHaveTheMouse();
+    heyIHaveTheMouse();
 });
 
 $(document).keydown(function(e) {
@@ -70,12 +70,14 @@ $(document).keydown(function(e) {
         keys[e.keyCode] = false;
     })
     .mousemove(function(e) {
-       heyIHaveTheMouse();
+       //heyIHaveTheMouse();
         mouseX = e.clientX;
         mouseY = e.clientY;
        // console.log(mouseX + " "+ mouseY);
-        //console.log(amIActive);
+        console.log(amIActive);
     });
+
+    
 
 function selectTextTwoElements(startElement, endElement) {
     var doc = document,
@@ -139,11 +141,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.greeting === 'updateEnabled') {
             enabled = request.result;
         } else if (request.greeting === "doSelectSingle") {
-            //console.log("I was told to do single select");
+            console.log("I was told to do single select");
 
             selectTextSingleElement(document.elementFromPoint(mouseX, mouseY));
         } else if (request.greeting === "doSelectRange") {
-            //console.log("I was told to do range select");
+            console.log("I was told to do range select");
 
             if (elements.length === 2)
                 elements = [];
@@ -171,14 +173,14 @@ function resetAllKeys() {
 
 function heyIHaveTheMouse() {
     //if (!amIActive) {
-        //console.log("I have the mouse");
+        console.log("I have the mouse");
         amIActive = true;
         messageBackground("imActiveTab");
     //}
 }
 
 function heyILostTheMouse() {
-    //console.log("I lost the mouse");
+    console.log("I lost the mouse");
 
     amIActive = false;
 }

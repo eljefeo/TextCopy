@@ -15,16 +15,16 @@ chrome.runtime.onMessage.addListener(
                 result: enabled
             });
         } else if (request.greeting === "imActiveTab") {
-            //console.log("new tab to select " + sender.tab.id);
+            console.log("new tab to select " + sender.tab.id);
           tabToCopy = sender.tab.id;
         } else if (request.greeting === "doSingleSelect") {
-            //console.log("telling tab " + tabToCopy +  " to do single select");
+            console.log("telling tab " + tabToCopy +  " to do single select");
 
             chrome.tabs.sendMessage(tabToCopy, {
                 greeting: 'doSelectSingle'
             }, function(response) {});
         } else if (request.greeting === "doRangeSelect") {
-            //console.log("telling tab " + tabToCopy +  " to do range select");
+            console.log("telling tab " + tabToCopy +  " to do range select");
 
             chrome.tabs.sendMessage(tabToCopy, {
                 greeting: 'doSelectRange'
